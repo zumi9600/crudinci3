@@ -3,7 +3,6 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Product extends CI_Controller
 {
-
     /**
      * Index Page for this controller.
      *
@@ -33,9 +32,6 @@ class Product extends CI_Controller
     {
         if ($this->ion_auth->logged_in()) {
             $products = $this->Product_model->list();
-            // echo '<pre>';
-            // print_r($products);
-            // exit;
             $data = array();
             $data['products'] = $products;
             $data['title'] = "Products";
@@ -47,33 +43,94 @@ class Product extends CI_Controller
     }
     public function create()
     {
-
         if ($this->ion_auth->logged_in()) {
-            $brands = $this->Brand_model->list();
             $data = array();
+            // $dataInfo = array(); 
+            // $photos = array(); 
+            $brands = $this->Brand_model->list();
             $data['brands'] = $brands;
             $data['title'] = "Add a product";
             $data['page_name'] = 'addproduct/addproduct';
             //Validate records
-            $this->form_validation->set_rules('name', 'Name', 'required');
-            $this->form_validation->set_rules('price', ' Price', 'required');
-            $this->form_validation->set_rules('quantity', ' Quantity', 'required');
-            $this->form_validation->set_rules('brand', ' Brand', 'required');
-            $this->form_validation->set_rules('category', ' Category', 'required');
-            $this->form_validation->set_rules('subcategory', ' Subcategory', 'required');
-            if ($this->form_validation->run() === TRUE) {
-                //Save records to DB
-                $formArray = array();
-                $formArray['name'] = $this->input->post('name');
-                $formArray['price'] = $this->input->post('price');
-                $formArray['quantity'] = $this->input->post('quantity');
-                $formArray['brand'] = $this->input->post('brand');
-                $formArray['category'] = $this->input->post('category');
-                $formArray['subcategory'] = $this->input->post('subcategory');
-                $formArray['created_at'] = date('Y-m-d');
-                $this->Product_model->create($formArray); //call create function and passing data(array) in model
-                $this->session->set_flashdata('success', 'Record added successfully!'); //Message will be shown once after record insertion
-                redirect('product', 'referesh');
+            if ($this->input->post()) {
+                $config = [
+                    'upload_path' => $_SERVER['DOCUMENT_ROOT'] . '/crudinci3/public/images/product/', 'allowed_types' => 'gif|jpg|png|jpeg',
+                ];
+                $this->load->library('upload', $config);
+                $this->upload->initialize($config);
+                $this->form_validation->set_rules('name', ' Name', 'required');
+                $this->form_validation->set_rules('price', ' Price', 'required');
+                $this->form_validation->set_rules('quantity', ' Quantity', 'required');
+                $this->form_validation->set_rules('brand', ' Brand', 'required');
+                $this->form_validation->set_rules('category', ' Category', 'required');
+                $this->form_validation->set_rules('subcategory', ' Subcategory', 'required');
+                if ($this->form_validation->run() === TRUE && $this->upload->do_upload('photo')) {
+                    //Save records to DB
+                    $formArray = array();
+
+                    // Single file upload
+                    $data = $this->upload->data();
+                    $image_path = $data['raw_name'] . $data['file_ext'];
+                    $formArray['photo'] = $image_path;
+                    $formArray['name'] = $this->input->post('name');
+                    $formArray['price'] = $this->input->post('price');
+                    $formArray['quantity'] = $this->input->post('quantity');
+                    $formArray['brand'] = $this->input->post('brand');
+                    $formArray['category'] = $this->input->post('category');
+                    $formArray['subcategory'] = $this->input->post('subcategory');
+                    $formArray['created_at'] = date('Y-m-d');
+                    // Getting id of last inserted product
+                    $last_id = $this->Product_model->create($formArray); //call create function and passing data(array) in model
+
+                    // Multiple file upload
+                    // Count total files
+
+                    // echo "<pre>";
+                    // print_r($last_id);
+                    // print_r($_FILES);
+                    // // exit;
+                    $countfiles = count($_FILES['files']['name']);
+                    $image_name = array();
+
+                    // Looping all files
+                    for ($i = 0; $i < $countfiles; $i++) {
+                        if (!empty($_FILES['files']['name'][$i])) {
+                            // Define new $_FILES array - $_FILES['file']
+                            $_FILES['file']['name'] = $_FILES['files']['name'][$i];
+                            $_FILES['file']['type'] = $_FILES['files']['type'][$i];
+                            $_FILES['file']['tmp_name'] = $_FILES['files']['tmp_name'][$i];
+                            $_FILES['file']['error'] = $_FILES['files']['error'][$i];
+                            $_FILES['file']['size'] = $_FILES['files']['size'][$i];
+
+                            // Set preference
+                            $config['file_name'] = $_FILES['files']['name'][$i];
+
+                            //Load upload library
+                            $this->load->library('upload', $config);
+
+                            // File upload
+                            if ($this->upload->do_upload('file')) {
+                                // Get data about the file
+                                $data = array('upload_data' => $this->upload->data());
+                                $image_name[$i]['name'] = $data['upload_data']['file_name'];
+                                $image_name[$i]['product'] = $last_id;
+                            }
+                        }
+                    }
+                    // echo '<pre>';
+                    // print_r($image_name);
+                    // exit;
+                    if (!empty($image_name)) {
+                        // Insert files data into the database
+                        $this->Product_model->multipleImages($image_name);
+                    }
+                    $this->session->set_flashdata('success', 'Records added successfully!'); //Message will be shown once after record insertion
+                    redirect('product', 'referesh');
+                } else {
+                    $upload_error = $this->upload->display_errors();
+                    $data['upload_error'] = $upload_error;
+                    $this->load->view('index', $data);
+                }
             } else {
                 $this->load->view('index', $data);
             }
@@ -83,38 +140,113 @@ class Product extends CI_Controller
     }
     public function edit($id)
     {
-
         if ($this->ion_auth->logged_in()) {
-            $product = $this->Product_model->getProduct($id);
-            $subcategories = $this->Subcategory_model->list();
-            $categories = $this->Category_model->list();
-            $brands = $this->Brand_model->list();
             $data = array();
-            $data['product'] = $product;
-            $data['subcategories'] = $subcategories;
+            $product = $this->Product_model->getProduct($id);
+            $brands = $this->Brand_model->list();
+            $categories = $this->Category_model->getCategoryByBrandId($product['brand']);
+            $subcategories = $this->Subcategory_model->getSubcategoryByCategoryId($product['category']);
+            $photos = $this->Product_model->photoByProductId($id);
+            // echo '<pre>';
+            // print_r($product);
+            // exit;
+            $data['photos'] = $photos;
             $data['brands'] = $brands;
             $data['categories'] = $categories;
+            $data['subcategories'] = $subcategories;
+            $data['product'] = $product;
             $data['title'] = "Edit a product";
             $data['page_name'] = 'editproduct/editproduct';
-            //Validate records
-            $this->form_validation->set_rules('name', ' Name', 'required');
-            $this->form_validation->set_rules('price', ' Price', 'required');
-            $this->form_validation->set_rules('quantity', ' Quantity', 'required');
-            $this->form_validation->set_rules('brand', ' Brand', 'required');
-            $this->form_validation->set_rules('category', ' Category', 'required');
-            $this->form_validation->set_rules('subcategory', ' Subcategory', 'required');
-            if ($this->form_validation->run() === TRUE) {
-                // Update product
-                $formArray = array();
-                $formArray['name'] = $this->input->post('name');
-                $formArray['price'] = $this->input->post('price');
-                $formArray['quantity'] = $this->input->post('quantity');
-                $formArray['brand'] = $this->input->post('brand');
-                $formArray['category'] = $this->input->post('category');
-                $formArray['subcategory'] = $this->input->post('subcategory');
-                $this->Product_model->updateProduct($formArray, $id);
-                $this->session->set_flashdata('success', 'Record updated successfully!');
-                redirect('product', 'referesh');
+            if ($this->input->post()) {
+                $this->form_validation->set_rules('name', 'Name', 'required');
+                $this->form_validation->set_rules('price', 'Price', 'required');
+                $this->form_validation->set_rules('quantity', 'Quantity', 'required');
+                $this->form_validation->set_rules('brand', ' Brand', 'required');
+                $this->form_validation->set_rules('category', ' Category', 'required');
+                $this->form_validation->set_rules('subcategory', ' Subcategory', 'required');
+                if ($this->form_validation->run() === TRUE) {
+                    $formArray = array();
+                    // Update product
+                    if (!empty($_FILES['photo']['size'] > 0)) {
+                        $config = [
+                            'upload_path' => $_SERVER['DOCUMENT_ROOT'] . '/crudinci3/public/images/product/',
+                            'allowed_types' => 'gif|jpg|png|jpeg',
+                        ];
+                        $this->load->library('upload', $config);
+                        $this->upload->initialize($config);
+                        $this->upload->do_upload('photo');
+                        $data = $this->upload->data();
+                        $image_path = $data['raw_name'] . $data['file_ext'];
+                        $file_name = $config['upload_path'] . $product['photo'];
+                        if (file_exists($file_name)) {
+                            unlink($file_name);
+                        }
+                        $formArray['photo'] = $image_path;
+                    } else {
+                        if (empty($product['photo'])) {
+                            $formArray['photo'] = '';
+                        }
+                    }
+                    $formArray['name'] = $this->input->post('name');
+                    $formArray['price'] = $this->input->post('price');
+                    $formArray['quantity'] = $this->input->post('quantity');
+                    $formArray['brand'] = $this->input->post('brand');
+                    $formArray['category'] = $this->input->post('category');
+                    $formArray['subcategory'] = $this->input->post('subcategory');
+                    $this->Product_model->updateProduct($formArray, $id);
+                    // Multiple file upload
+                    // Count total files
+                    $countfiles = count($_FILES['files']['name']);
+                    $image_name = array();
+                    // echo '<pre>';
+                    // print_r($countfiles);
+                    // exit;
+                    // Looping all files
+                    for ($i = 0; $i < $countfiles; $i++) {
+                        if (!empty($_FILES['files']['name'][$i])) {
+                            $config = [
+                                'upload_path' => $_SERVER['DOCUMENT_ROOT'] . '/crudinci3/public/images/product/',
+                                'allowed_types' => 'gif|jpg|png|jpeg',
+                            ];
+                            // Define new $_FILES array - $_FILES['file']
+                            $_FILES['file']['name'] = $_FILES['files']['name'][$i];
+                            $_FILES['file']['type'] = $_FILES['files']['type'][$i];
+                            $_FILES['file']['tmp_name'] = $_FILES['files']['tmp_name'][$i];
+                            $_FILES['file']['error'] = $_FILES['files']['error'][$i];
+                            $_FILES['file']['size'] = $_FILES['files']['size'][$i];
+                            // Set preference
+                            $config['file_name'] = $_FILES['files']['name'][$i];
+                            //Load upload library
+
+                            // File upload
+                            if (!empty($_FILES['file']['size'] > 0)) {
+                                $this->load->library('upload', $config);
+                                $this->upload->initialize($config);
+                                $this->upload->do_upload('file');
+
+                                // Get data about the file
+                                $data = array('upload_data' => $this->upload->data());
+
+                                $image_name[$i]['name'] = $data['upload_data']['file_name'];
+                                $image_name[$i]['product'] = $id;
+                                $file_name = $config['upload_path'] . $_FILES['files']['name'][$i];
+                                // print_r($file_name);
+                                // exit;
+                                // if (file_exists($file_name)) {
+                                //     unlink($file_name);
+                                // }
+                            }
+                        }
+                    }
+                    if (!empty($image_name)) {
+                        // Insert files data into the database
+                        $this->Product_model->multipleImages($image_name);
+                    }
+                    $this->session->set_flashdata('success', 'Records updated successfully!');
+                    redirect('product', 'referesh');
+                } else {
+                    $this->load->view('index', $data);
+                }
             } else {
                 $this->load->view('index', $data);
             }
@@ -130,11 +262,40 @@ class Product extends CI_Controller
                 $this->session->set_flashdata('failure', 'Record not found.');
                 redirect('product', 'referesh');
             }
+            $photos = $this->Product_model->photoByProductId($id);
+
+            foreach ($photos as $photo) {
+                unlink($_SERVER['DOCUMENT_ROOT'] . '/crudinci3/public/images/product/' . $photo['name']);
+            }
+            unlink($_SERVER['DOCUMENT_ROOT'] . '/crudinci3/public/images/product/' . $product['photo']);
+            $this->Product_model->deletePhotoByProductId($id);
             $this->Product_model->deleteProduct($id);
-            $this->session->set_flashdata('success', 'Record deleted successfully!');
+            $this->session->set_flashdata('success', 'Records deleted successfully!');
             redirect('product', 'referesh');
         } else {
             redirect('auth/login', 'refresh');
         }
+    }
+    public function deleteImage()
+    {
+        // $status  = 'err';
+        // If post request is submitted via ajax 
+        if ($this->input->post('id')) {
+            $id = $this->input->post('id');
+            $photo = $this->Product_model->getPhotoById($id);
+            // print_r($photo);
+            // exit;
+            // Delete image data 
+            // $con = array('id' => $id);
+            if ($photo) {
+                // Remove files from the server  
+                unlink($_SERVER['DOCUMENT_ROOT'] . '/crudinci3/public/images/product/' . $photo['name']);
+                $delete = $this->Product_model->deletePhoto($id);
+                echo 1;
+            }
+            // redirect('product/edit', 'referesh');
+        }
+        // echo $status;
+        // die;
     }
 }

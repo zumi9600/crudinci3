@@ -31,6 +31,11 @@ class Subcategory_model extends CI_Model
         $this->db->where('id', $id);
         $this->db->delete('subcategories');
     }
+    function getSubcategoryByCategoryId($category)
+    {
+        $this->db->where('category', $category);
+        return $subcategory = $this->db->get('subcategories')->result_array();
+    }
     function getCategoryByBrand($brand_id)
     {
         $this->db->where('categories.brand', $brand_id);

@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 30, 2020 at 04:42 PM
+-- Generation Time: Nov 17, 2020 at 10:19 AM
 -- Server version: 10.4.14-MariaDB
--- PHP Version: 7.2.34
+-- PHP Version: 7.4.11
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -39,9 +39,10 @@ CREATE TABLE `brands` (
 
 INSERT INTO `brands` (`id`, `name`, `created_at`) VALUES
 (2, 'Engine', '2020-10-30'),
-(3, 'Furor', '2020-10-30'),
-(4, 'Levis', '2020-10-30'),
-(5, 'Outfitters', '2020-10-30');
+(5, 'Outfitters', '2020-10-30'),
+(7, 'HP', '2020-11-16'),
+(8, 'Logitech', '2020-11-16'),
+(9, 'Dell', '2020-11-16');
 
 -- --------------------------------------------------------
 
@@ -52,6 +53,7 @@ INSERT INTO `brands` (`id`, `name`, `created_at`) VALUES
 CREATE TABLE `categories` (
   `id` int(10) NOT NULL,
   `name` varchar(50) NOT NULL,
+  `brand` int(50) NOT NULL,
   `created_at` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -59,9 +61,13 @@ CREATE TABLE `categories` (
 -- Dumping data for table `categories`
 --
 
-INSERT INTO `categories` (`id`, `name`, `created_at`) VALUES
-(2, 'Cloth', '2020-10-30'),
-(4, 'Accessories', '2020-10-30');
+INSERT INTO `categories` (`id`, `name`, `brand`, `created_at`) VALUES
+(2, 'Cloth', 0, '2020-10-30'),
+(4, 'Accessories', 0, '2020-10-30'),
+(6, 'Laptop', 7, '2020-11-16'),
+(7, 'LCDs', 9, '2020-11-16'),
+(8, 'Men Clothes', 5, '2020-11-16'),
+(10, 'Accessories', 7, '2020-11-16');
 
 -- --------------------------------------------------------
 
@@ -139,14 +145,6 @@ CREATE TABLE `login_attempts` (
   `time` int(11) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
---
--- Dumping data for table `login_attempts`
---
-
-INSERT INTO `login_attempts` (`id`, `ip_address`, `login`, `time`) VALUES
-(25, '::1', 'hamza@admin.com', 1604064013),
-(26, '::1', 'hamza@admin.com', 1604064026);
-
 -- --------------------------------------------------------
 
 --
@@ -158,6 +156,7 @@ CREATE TABLE `products` (
   `name` varchar(255) NOT NULL,
   `price` int(20) NOT NULL,
   `quantity` int(20) NOT NULL,
+  `brand` int(50) NOT NULL,
   `category` varchar(50) NOT NULL,
   `subcategory` varchar(50) NOT NULL,
   `status` int(11) NOT NULL DEFAULT 0,
@@ -168,10 +167,12 @@ CREATE TABLE `products` (
 -- Dumping data for table `products`
 --
 
-INSERT INTO `products` (`id`, `name`, `price`, `quantity`, `category`, `subcategory`, `status`, `created_at`) VALUES
-(13, 'Logitech Mouse', 2000, 15, 'Accessories', 'Computer Accessories', 0, '2020-10-29'),
-(14, 'tech Mouse', 500, 20, 'Accessories', 'Computer Accessories', 0, '2020-10-29'),
-(16, 'Men Winter Jacket', 5000, 10, 'Cloth', 'Jacket', 0, '2020-10-30');
+INSERT INTO `products` (`id`, `name`, `price`, `quantity`, `brand`, `category`, `subcategory`, `status`, `created_at`) VALUES
+(17, 'hp corei7 7th gen', 50000, 5, 7, '6', '7', 0, '2020-11-16'),
+(18, 'blue men jeans', 3000, 15, 5, '8', '5', 0, '2020-11-16'),
+(19, 'HP wireless mouse', 2500, 20, 7, '10', '8', 0, '2020-11-16'),
+(20, 'Dell 24\'\' LCD Black', 5000, 10, 9, '7', '6', 0, '2020-11-16'),
+(21, 'Black men jeans', 4000, 20, 5, '8', '5', 0, '2020-11-16');
 
 -- --------------------------------------------------------
 
@@ -182,6 +183,8 @@ INSERT INTO `products` (`id`, `name`, `price`, `quantity`, `category`, `subcateg
 CREATE TABLE `subcategories` (
   `id` int(10) NOT NULL,
   `name` varchar(50) NOT NULL,
+  `brand` int(50) NOT NULL,
+  `category` int(50) NOT NULL,
   `created_at` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -189,9 +192,11 @@ CREATE TABLE `subcategories` (
 -- Dumping data for table `subcategories`
 --
 
-INSERT INTO `subcategories` (`id`, `name`, `created_at`) VALUES
-(3, 'Shirts', '2020-10-30'),
-(4, 'Jackets', '2020-10-30');
+INSERT INTO `subcategories` (`id`, `name`, `brand`, `category`, `created_at`) VALUES
+(5, 'Jeans', 5, 8, '2020-11-16'),
+(6, '24\'\' LCD', 9, 7, '2020-11-16'),
+(7, 'Corei7 laptop', 7, 6, '2020-11-16'),
+(8, 'Computer Accessories', 7, 10, '2020-11-16');
 
 -- --------------------------------------------------------
 
@@ -227,7 +232,7 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `ip_address`, `username`, `password`, `email`, `activation_selector`, `activation_code`, `forgotten_password_selector`, `forgotten_password_code`, `forgotten_password_time`, `remember_selector`, `remember_code`, `created_on`, `last_login`, `active`, `first_name`, `last_name`, `company`, `phone`) VALUES
 (1, '127.0.0.1', 'administrator', '$2y$12$YmjdGVas0sc8M6.zZvrW5Oxx7qGhuaMQbQa.iVhfU/UP4eD.WYSUu', 'admin@admin.com', NULL, '', NULL, NULL, NULL, NULL, NULL, 1268889823, 1603813240, 1, 'Admin', 'istrator', 'ADMIN', '0'),
-(3, '::1', NULL, '$2y$10$pULvSa/G1/58p94Kgy4Inuc17blkPkKNYAjyRZRUF/BXDYvZaGs6.', 'hamza@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1603805832, 1604064078, 1, 'Muhammad', 'Hamza', NULL, NULL);
+(3, '::1', NULL, '$2y$10$pULvSa/G1/58p94Kgy4Inuc17blkPkKNYAjyRZRUF/BXDYvZaGs6.', 'hamza@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1603805832, 1605518709, 1, 'Muhammad', 'Hamza', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -317,13 +322,13 @@ ALTER TABLE `users_groups`
 -- AUTO_INCREMENT for table `brands`
 --
 ALTER TABLE `brands`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `groups`
@@ -341,13 +346,13 @@ ALTER TABLE `login_attempts`
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `subcategories`
 --
 ALTER TABLE `subcategories`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `users`

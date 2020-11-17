@@ -19,6 +19,11 @@ class Category_model extends CI_Model
         $this->db->where('id', $id);
         return $category = $this->db->get('categories')->row_array();
     }
+    function getCategoryByBrandId($brand)
+    {
+        $this->db->where('brand', $brand);
+        return $category = $this->db->get('categories')->result_array();
+    }
     function updateCategory($formArray, $id)
     {
         $this->db->where('id', $id);

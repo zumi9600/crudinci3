@@ -20,7 +20,7 @@
 
     <!-- Main content -->
     <section class="content">
-        <form name="addBrand" action="<?= base_url() . 'index.php/product/create' ?>" method="post">
+        <form name="addBrand" action="<?= base_url() . 'index.php/product/create' ?>" method="post" enctype="multipart/form-data">
             <div class="row">
                 <div class="col-md-6">
                     <div class="card card-primary">
@@ -82,6 +82,14 @@
                                     <option value="">Select Subcategory</option>
                                 </select>
                                 <?php echo form_error('subcategory'); ?>
+                            </div>
+                            <div class="form-group">
+                                <label>Photo</label><br>
+                                <input type="file" id="photo" name="photo">
+                            </div>
+                            <div class="form-group">
+                                <label>Photos</label><br>
+                                <input type="file" id="files" name="files[]" multiple>
                             </div>
                         </div>
                         <!-- /.card-body -->

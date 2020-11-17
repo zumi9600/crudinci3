@@ -22,7 +22,7 @@
 
     <!-- Main content -->
     <section class="content">
-        <form name="addProduct" action="<?= base_url() . 'index.php/product/edit/' . $product['id']; ?>" method="post">
+        <form name="addProduct" action="<?= base_url() . 'index.php/product/edit/' . $product['id']; ?>" method="post" enctype="multipart/form-data">
             <div class="row">
                 <div class="col-md-6">
                     <div class="card card-primary">
@@ -93,7 +93,33 @@
                                     </select>
                                 <?php   }
                                 echo form_error('subcategory'); ?>
-                            </div> <!-- /.card-body -->
+                            </div>
+                            <div class="form-group">
+                                <?php if (!empty($product['photo'])) { ?>
+                                    <img style="width: 200px; height:200px" src="<?= base_url() . '/public/images/product/' . $product['photo'] ?>" alt="Product Photo" />
+                                <?php } else {
+                                    echo "No image found."; ?>
+                                <?php } ?>
+                                <br><label>Photo</label><br>
+                                <input type="file" id="photo" name="photo">
+                                <hr>
+                            </div>
+                            <div class="form-group">
+                                <?php if (!empty($photos)) { ?>
+                                    <?php foreach ($photos as $photo) { ?>
+                                        <div id="<?= $photo['id'] ?>">
+                                            <img class="img-responsive" style="width: 200px; height:200px" src="<?= base_url() . '/public/images/product/' . $photo['name'] ?>" alt="Product Photo" /><br>
+                                            <a onclick="deleteImage(<?= $photo['id'] ?>)" class="btn btn-danger btn-sm">Delete <i class="fa fa-trash"></i></a><br>
+                                            <!-- <a class="btn btn-danger"><i class="fas fa-trash"></i></a> -->
+                                        </div>
+                                <?php }
+                                } else {
+                                    echo "No images found.";
+                                } ?>
+                                <br><label>Photos</label><br>
+                                <input type="file" id="files" name="files[]" multiple>
+
+                            </div>
                             <div class="form-group">
                                 <div class="card-footer text-center">
                                     <button class="btn btn-primary ">Update</button>
@@ -101,7 +127,6 @@
                                         Cancel
                                     </a>
                                 </div>
-
                             </div>
                         </div>
                         <!-- /.card -->
@@ -113,6 +138,7 @@
 </div>
 <script type="text/javascript">
     $(document).ready(function() {
+        // Fetching categories by brand
         $('#brand').change(function() {
             var id = $(this).val();
             $.ajax({
@@ -135,6 +161,7 @@
             });
             return false;
         });
+        // Fetching subcategories by category
         $('#category').change(function() {
             var id = $(this).val();
             $.ajax({
@@ -157,6 +184,25 @@
             });
             return false;
         });
-
     });
+    // Delete product images from db
+    function deleteImage(id) {
+        if (confirm('Photo will be permanently deleted. Are you sure?') == true) {
+            // alert($id);
+            $.ajax({
+                url: "<?= base_url() . 'index.php/product/deleteImage'; ?>",
+                method: "post",
+                data: {
+                    id: id,
+                },
+                success: function(response) {
+                    if (response == 1) {
+                        alert('Image Deleted Successfully.');
+                    } else {
+                        alert('Deletion Failed');
+                    }
+                }
+            })
+        }
+    }
 </script>
