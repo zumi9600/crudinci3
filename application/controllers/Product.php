@@ -290,10 +290,10 @@ class Product extends CI_Controller
             if ($photo) {
                 // Remove files from the server  
                 unlink($_SERVER['DOCUMENT_ROOT'] . '/crudinci3/public/images/product/' . $photo['name']);
-                $delete = $this->Product_model->deletePhoto($id);
+                $this->Product_model->deletePhoto($id);
                 echo 1;
             }
-            // redirect('product/edit', 'referesh');
+            // redirecst('product/edit', 'referesh');
         }
         // echo $status;
         // die;

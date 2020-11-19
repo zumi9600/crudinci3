@@ -6,13 +6,11 @@
                 <div class="col-sm-6">
                     <h1>Edit</h1>
                 </div>
-
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="<?= base_url('index.php/welcome') ?>">Home</a></li>
                         <li class="breadcrumb-item active"><a href="<?= base_url('index.php/product') ?>">Products</a></li>
                         <li class="breadcrumb-item active">Edit</li>
-
                     </ol>
                 </div>
             </div>
@@ -198,6 +196,7 @@
                 success: function(response) {
                     if (response == 1) {
                         alert('Image Deleted Successfully.');
+                        window.location = "<?= base_url() . 'index.php/product/edit/' . $product['id']; ?>";
                     } else {
                         alert('Deletion Failed');
                     }
