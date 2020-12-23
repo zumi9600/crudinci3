@@ -22,12 +22,12 @@
                     <!-- small box -->
                     <div class="small-box bg-info">
                         <div class="inner">
-                            <h3>150</h3>
+                            <h3><?= $total_sales; ?></h3>
 
-                            <p>New Orders</p>
+                            <p>Sales</p>
                         </div>
                         <div class="icon">
-                            <i class="ion ion-bag"></i>
+                            <i class="fas fa-shopping-cart"></i>
                         </div>
                         <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                     </div>
@@ -88,7 +88,7 @@
                     <!-- Custom tabs (Charts with tabs)-->
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Bar Chart</h3>
+                            <h3 class="card-title">Sales Per Month</h3>
 
                             <div class="card-tools">
                                 <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
@@ -632,10 +632,10 @@
     var barChart = new Chart(barChartCanvas, {
         type: 'bar', //bar, horizontal, pie, line, 
         data: {
-            labels: ['July', 'August', 'September', 'October', 'November', 'December'],
+            labels: <?php echo json_encode($months_name); ?>,
             datasets: [{
                 label: 'Sales',
-                data: [28, 48, 40, 19, 86, 90],
+                data: <?php echo json_encode($sales_per_month); ?>,
                 backgroundColor: 'rgba(60,141,188,0.9)',
                 borderWidth: 1,
                 borderColor: '#777',
@@ -643,6 +643,21 @@
                 hoverBorderColor: '#000'
             }]
         },
-        options: barChartOptions
+        options: {
+            barChartOptions,
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true,
+                        callback: function(value) {
+                            if (value % 1 === 0) {
+                                return value;
+                            }
+                        }
+                    }
+                }]
+            }
+        }
+        // options: barChartOptions
     })
 </script>

@@ -98,28 +98,12 @@ class Sale extends CI_Controller
             $subject = " Invoice ID # " . $invoice_id;
             $page_name = 'email/email';
             $body = $this->load->view($page_name . '.php', $data, TRUE);
-
-            echo "<pre>";
-            print_r($user_email);
-            // print_r($body);
-            // Intizializing email library
-            // $this->email->initialize($config);
-            // $this->email->set_newline("\r\n");
-
             $this->email->from($user_email);
             $this->email->to($to); // replace it with receiver mail id
             $this->email->subject($subject); // replace it with relevant subject
             $this->email->message($body);
             $this->email->send();
             echo $this->email->print_debugger();
-
-            // print_r($sale_items);
-            // exit;
-            // $this->Brand_model->create($formArray); //call create function and passing data(array) in model
-            //     $this->session->set_flashdata('success', 'Record added successfully!'); //Message will be shown once after record insertion
-
-
-            // $this->load->view('index', $data);
         } else {
             redirect('auth/login', 'refresh');
         }
@@ -129,18 +113,7 @@ class Sale extends CI_Controller
         if ($this->ion_auth->logged_in()) {
             $user = $this->Ion_auth_model->user()->row();
             $sales = $this->Sale_model->list();
-            // $sales_total = $this->Sale_model->saleSum();
             $sales_total = $this->Sale_model->saleSum();
-            $sale_months = $this->Sale_model->getMonth();
-            echo '<pre>';
-            // foreach ($sales as $sale) {
-            print_r($sale_months);
-            // }
-            exit;
-            // foreach ($sales as $sale) {
-            //     $sales_total_quantity = $sale['sale_quantity'];
-            //     $sales_total_amount = $sale['sale_amount'];
-            // }
             $data['sale_total_amount'] = $sales_total['sale_total_amount'];
             $data['sale_total_quantity'] = $sales_total['sale_total_quantity'];
             $data['total_sales'] = $sales_total['total_sales'];

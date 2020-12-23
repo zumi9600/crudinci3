@@ -56,15 +56,20 @@ class Sale_model extends CI_Model
         return $query->row_array();
         echo $this->db->num_rows();
     }
-    function getMonth()
+    function getSalesPerMonth()
     {
-        $this->db->select('MONTH(time_created) as month,COUNT(MONTH(time_created)) as total');
-        $this->db->group_by('sales.time_created');
-        $this->db->order_by('sales.time_created', 'ASC');
+        $this->db->select('DATE_FORMAT(time_created, "%m") as month,count(*) as num_of_sales');
+        $this->db->group_by('DATE_FORMAT(time_created, "%m")');
         $query = $this->db->get('sales');
-
-        return $query->result();
+        return $query->result_array();
     }
+    // function getMonthsName()
+    // {
+    //     $this->db->select('');
+    //     $this->db->group_by('DATE_FORMAT(time_created, "%m")');
+    //     $query = $this->db->get('sales');
+    //     return $query->result_array();
+    // }
     // function getBrand($id)
     // {
     //     $this->db->where('id', $id);
