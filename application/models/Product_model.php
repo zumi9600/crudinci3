@@ -14,6 +14,7 @@ class Product_model extends CI_Model
     {
         $this->db->select('brands.name as brand_name,categories.name as category_name,subcategories.name as subcategory_name,products.*');
         $this->db->from('products');
+        $this->db->where('products.is_deleted=0');
         $this->db->join('subcategories', 'products.subcategory=subcategories.id');
         $this->db->join('categories', 'products.category=categories.id');
         $this->db->join('brands', 'products.brand=brands.id');
@@ -33,7 +34,7 @@ class Product_model extends CI_Model
     }
     function photoByProductId($id)
     {
-        $this->db->where('product', $id);
+        $this->db->where('product', $id and 'is_deleted=0');
         return $product = $this->db->get('photos')->result_array();
     }
     function updateProduct($formArray, $id)
@@ -41,19 +42,24 @@ class Product_model extends CI_Model
         $this->db->where('id', $id);
         $this->db->update('products', $formArray);
     }
-    function deleteProduct($id)
+    function updatePhotos($photos, $id)
     {
         $this->db->where('id', $id);
-        $this->db->delete('products');
+        $this->db->update('photos', $photos);
     }
-    function deletePhotoByProductId($id)
-    {
-        $this->db->where('photos.product', $id);
-        $this->db->delete('photos');
-    }
-    function deletePhoto($id)
-    {
-        $this->db->where('id', $id);
-        $this->db->delete('photos');
-    }
+    // function deleteProduct($id)
+    // {
+    //     $this->db->where('id', $id);
+    //     $this->db->delete('products');
+    // }
+    // function deletePhotoByProductId($id)
+    // {
+    //     $this->db->where('photos.product', $id);
+    //     $this->db->delete('photos');
+    // }
+    // function deletePhoto($id)
+    // {
+    //     $this->db->where('id', $id);
+    //     $this->db->delete('photos');
+    // }
 }

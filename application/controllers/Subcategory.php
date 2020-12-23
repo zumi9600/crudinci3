@@ -26,6 +26,7 @@ class Subcategory extends CI_Controller
         $this->load->model('Subcategory_model');
         $this->load->model('Brand_model');
         $this->load->model('Category_model');
+        $this->load->model('Ion_auth_model');
     }
     public function index()
     {
@@ -35,6 +36,8 @@ class Subcategory extends CI_Controller
             // print_r($subcategories);
             // exit;
             $data = array();
+            $user = $this->Ion_auth_model->user()->row();
+            $data['user'] = $user;
             $data['subcategories'] = $subcategories;
             $data['title'] = "View Subcategories";
             $data['page_name'] = 'subcategories/subcategories';
@@ -60,6 +63,8 @@ class Subcategory extends CI_Controller
         if ($this->ion_auth->logged_in()) {
             $brands = $this->Brand_model->list();
             $data = array();
+            $user = $this->Ion_auth_model->user()->row();
+            $data['user'] = $user;
             $data['brands'] = $brands;
             $data['title'] = "Add a subcategory";
             $data['page_name'] = 'addsubcategory/addsubcategory';
@@ -90,6 +95,8 @@ class Subcategory extends CI_Controller
             $categories = $this->Category_model->list();
             $brands = $this->Brand_model->list();
             $data = array();
+            $user = $this->Ion_auth_model->user()->row();
+            $data['user'] = $user;
             $data['subcategory'] = $subcategory;
             $data['brands'] = $brands;
             $data['categories'] = $categories;
@@ -117,13 +124,20 @@ class Subcategory extends CI_Controller
     }
     public function delete($id)
     {
-        $subcategory = $this->Subcategory_model->getSubcategory($id);
-        if (empty($subcategory)) {
-            $this->session->set_flashdata('failure', 'Record not found.');
-            redirect('subcategory', 'referesh');
+        if ($this->ion_auth->logged_in()) {
+            $subcategory = $this->Subcategory_model->getSubcategory($id);
+            if (empty($subcategory)) {
+                $this->session->set_flashdata('failure', 'Record not found.');
+                redirect('subcategory', 'referesh');
+            } else {
+                $formArray = array();
+                $formArray['is_deleted'] = 1;
+                $this->Subcategory_model->updateSubcategory($formArray, $id);
+                $this->session->set_flashdata('success', 'Record deleted successfully!');
+                redirect('subcategory', 'referesh');
+            }
+        } else {
+            redirect('auth/login', 'refresh');
         }
-        $this->Subcategory_model->deleteSubcategory($id);
-        $this->session->set_flashdata('success', 'Record deleted successfully!');
-        redirect('subcategory', 'referesh');
     }
 }

@@ -11,6 +11,7 @@ class Category_model extends CI_Model
         $this->db->select('brands.name as brand_name,categories.*');
         $this->db->from('categories');
         $this->db->join('brands', 'categories.brand=brands.id');
+        $this->db->where('categories.is_deleted', 0);
         $query = $this->db->get();
         return $result = $query->result_array(); //SELECT * from products
     }
@@ -23,15 +24,16 @@ class Category_model extends CI_Model
     {
         $this->db->where('brand', $brand);
         return $category = $this->db->get('categories')->result_array();
+        
     }
     function updateCategory($formArray, $id)
     {
         $this->db->where('id', $id);
         $this->db->update('categories', $formArray);
     }
-    function deleteCategory($id)
-    {
-        $this->db->where('id', $id);
-        $this->db->delete('categories');
-    }
+    // function deleteCategory($id)
+    // {
+    //     $this->db->where('id', $id);
+    //     $this->db->delete('categories');
+    // }
 }

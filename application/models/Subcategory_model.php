@@ -12,6 +12,7 @@ class Subcategory_model extends CI_Model
         $this->db->from('subcategories');
         $this->db->join('categories', 'subcategories.category=categories.id');
         $this->db->join('brands', 'subcategories.brand=brands.id');
+        $this->db->where('subcategories.is_deleted', 0);
         $query = $this->db->get();
         return $result = $query->result_array(); //SELECT * from products
     }
@@ -26,11 +27,11 @@ class Subcategory_model extends CI_Model
         $this->db->where('id', $id);
         $this->db->update('subcategories', $formArray);
     }
-    function deleteSubcategory($id)
-    {
-        $this->db->where('id', $id);
-        $this->db->delete('subcategories');
-    }
+    // function deleteSubcategory($id)
+    // {
+    //     $this->db->where('id', $id);
+    //     $this->db->delete('subcategories');
+    // }
     function getSubcategoryByCategoryId($category)
     {
         $this->db->where('category', $category);

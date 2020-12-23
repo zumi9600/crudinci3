@@ -1,7 +1,8 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Welcome extends CI_Controller {
+class Welcome extends CI_Controller
+{
 
 	/**
 	 * Index Page for this controller.
@@ -21,13 +22,16 @@ class Welcome extends CI_Controller {
 	public function index()
 	{
 		$this->load->library('ion_auth');
+		$this->load->model('Ion_auth_model');
 		if ($this->ion_auth->logged_in()) {
-		$data['title']='AdminLTE 3 | Dashboard';
-		$data['page_name']='layout/content';
-		$this->load->view('index',$data);
-		}
-		else{
-			redirect('auth/login','refresh');
+			$user = $this->Ion_auth_model->user()->row();
+			$data['user'] = $user;
+			$data['title'] = 'AdminLTE 3 | Dashboard';
+			$data['page_name'] = 'layout/content';
+			$this->load->model('Ion_auth_model');
+			$this->load->view('index', $data);
+		} else {
+			redirect('auth/login', 'refresh');
 		}
 	}
 }

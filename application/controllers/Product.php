@@ -27,12 +27,15 @@ class Product extends CI_Controller
         $this->load->model('Subcategory_model');
         $this->load->model('Brand_model');
         $this->load->model('Category_model');
+        $this->load->model('Ion_auth_model');
     }
     public function index()
     {
         if ($this->ion_auth->logged_in()) {
             $products = $this->Product_model->list();
             $data = array();
+            $user = $this->Ion_auth_model->user()->row();
+            $data['user'] = $user;
             $data['products'] = $products;
             $data['title'] = "Products";
             $data['page_name'] = 'products/products';
@@ -47,6 +50,8 @@ class Product extends CI_Controller
             $data = array();
             // $dataInfo = array(); 
             // $photos = array(); 
+            $user = $this->Ion_auth_model->user()->row();
+            $data['user'] = $user;
             $brands = $this->Brand_model->list();
             $data['brands'] = $brands;
             $data['title'] = "Add a product";
@@ -67,7 +72,6 @@ class Product extends CI_Controller
                 if ($this->form_validation->run() === TRUE && $this->upload->do_upload('photo')) {
                     //Save records to DB
                     $formArray = array();
-
                     // Single file upload
                     $data = $this->upload->data();
                     $image_path = $data['raw_name'] . $data['file_ext'];
@@ -142,6 +146,8 @@ class Product extends CI_Controller
     {
         if ($this->ion_auth->logged_in()) {
             $data = array();
+            $user = $this->Ion_auth_model->user()->row();
+            $data['user'] = $user;
             $product = $this->Product_model->getProduct($id);
             $brands = $this->Brand_model->list();
             $categories = $this->Category_model->getCategoryByBrandId($product['brand']);
@@ -167,7 +173,10 @@ class Product extends CI_Controller
                 if ($this->form_validation->run() === TRUE) {
                     $formArray = array();
                     // Update product
-                    if (!empty($_FILES['photo']['size'] > 0)) {
+                    if (!empty($_FILES['photo']['size']) && $_FILES['photo']['name'] != $product['photo']) {
+                        // echo '<pre>';
+                        // print_r($_FILES);
+
                         $config = [
                             'upload_path' => $_SERVER['DOCUMENT_ROOT'] . '/crudinci3/public/images/product/',
                             'allowed_types' => 'gif|jpg|png|jpeg',
@@ -177,7 +186,9 @@ class Product extends CI_Controller
                         $this->upload->do_upload('photo');
                         $data = $this->upload->data();
                         $image_path = $data['raw_name'] . $data['file_ext'];
-                        $file_name = $config['upload_path'] . $product['photo'];
+                        $file_name = $config['upload_path'] .  $product['photo'];
+                        // print_r($file_name);
+                        // exit;
                         if (file_exists($file_name)) {
                             unlink($file_name);
                         }
@@ -261,41 +272,38 @@ class Product extends CI_Controller
             if (empty($product)) {
                 $this->session->set_flashdata('failure', 'Record not found.');
                 redirect('product', 'referesh');
+            } else {
+                $formArray = array();
+                $photos = array();
+                $photos = $this->Product_model->photoByProductId($id);
+                foreach ($photos as $photo) {
+                    $photo['is_deleted'] = 1;
+                    $this->Product_model->updatePhotos($photo, $photo['id']);
+                }
+                $formArray['is_deleted'] = 1;
+                $this->Product_model->updateProduct($formArray, $id);
+                $this->session->set_flashdata('success', 'Records deleted successfully!');
+                redirect('product', 'referesh');
             }
-            $photos = $this->Product_model->photoByProductId($id);
-
-            foreach ($photos as $photo) {
-                unlink($_SERVER['DOCUMENT_ROOT'] . '/crudinci3/public/images/product/' . $photo['name']);
-            }
-            unlink($_SERVER['DOCUMENT_ROOT'] . '/crudinci3/public/images/product/' . $product['photo']);
-            $this->Product_model->deletePhotoByProductId($id);
-            $this->Product_model->deleteProduct($id);
-            $this->session->set_flashdata('success', 'Records deleted successfully!');
-            redirect('product', 'referesh');
         } else {
             redirect('auth/login', 'refresh');
         }
     }
     public function deleteImage()
     {
-        // $status  = 'err';
-        // If post request is submitted via ajax 
-        if ($this->input->post('id')) {
-            $id = $this->input->post('id');
-            $photo = $this->Product_model->getPhotoById($id);
-            // print_r($photo);
-            // exit;
-            // Delete image data 
-            // $con = array('id' => $id);
-            if ($photo) {
-                // Remove files from the server  
-                unlink($_SERVER['DOCUMENT_ROOT'] . '/crudinci3/public/images/product/' . $photo['name']);
-                $this->Product_model->deletePhoto($id);
-                echo 1;
+        if ($this->ion_auth->logged_in()) {
+            // If post request is submitted via ajax 
+            if ($this->input->post('id')) {
+                $id = $this->input->post('id');
+                $photo = $this->Product_model->getPhotoById($id);
+                // Delete image from folder and then from db
+                if ($photo) {
+                    // Remove files from the server  
+                    $photo['is_deleted'] = 1;
+                    $this->Product_model->updatePhotos($photo, $photo['id']);
+                    echo 1;
+                }
             }
-            // redirecst('product/edit', 'referesh');
         }
-        // echo $status;
-        // die;
     }
 }

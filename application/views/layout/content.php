@@ -88,6 +88,30 @@
                     <!-- Custom tabs (Charts with tabs)-->
                     <div class="card">
                         <div class="card-header">
+                            <h3 class="card-title">Bar Chart</h3>
+
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
+                                </button>
+                                <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i></button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart">
+                                <div class="chartjs-size-monitor">
+                                    <div class="chartjs-size-monitor-expand">
+                                        <div class=""></div>
+                                    </div>
+                                    <div class="chartjs-size-monitor-shrink">
+                                        <div class=""></div>
+                                    </div>
+                                </div>
+                                <canvas id="barChart" style="height: 230px; min-height: 230px; display: block; width: 572px;" width="715" height="287" class="chartjs-render-monitor"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- <div class="card">
+                        <div class="card-header">
                             <h3 class="card-title">
                                 <i class="fas fa-chart-pie mr-1"></i>
                                 Sales
@@ -102,10 +126,10 @@
                                     </li>
                                 </ul>
                             </div>
-                        </div><!-- /.card-header -->
+                        </div>
                         <div class="card-body">
                             <div class="tab-content p-0">
-                                <!-- Morris chart - Sales -->
+
                                 <div class="chart tab-pane active" id="revenue-chart" style="position: relative; height: 300px;">
                                     <canvas id="revenue-chart-canvas" height="300" style="height: 300px;"></canvas>
                                 </div>
@@ -113,8 +137,8 @@
                                     <canvas id="sales-chart-canvas" height="300" style="height: 300px;"></canvas>
                                 </div>
                             </div>
-                        </div><!-- /.card-body -->
-                    </div> <!-- /.card -->
+                        </div>
+                    </div> -->
 
                     <!-- DIRECT CHAT -->
                     <div class="card direct-chat direct-chat-primary">
@@ -584,3 +608,41 @@
         </div><!-- /.container-fluid -->
     </section> <!-- /.content -->
 </div>
+<script>
+    /* ChartJS
+     * -------
+     * Here we will create a few charts using ChartJS
+     */
+    //-------------
+    //- BAR CHART -
+    //-------------
+    var barChartCanvas = $('#barChart').get(0).getContext('2d');
+    // var barChartData = jQuery.extend(true, {}, areaChartData)
+    // var temp0 = areaChartData.datasets[0]
+    // var temp1 = areaChartData.datasets[1]
+    // barChartData.datasets[0] = temp1
+    // barChartData.datasets[1] = temp0
+
+    var barChartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        datasetFill: false
+    }
+
+    var barChart = new Chart(barChartCanvas, {
+        type: 'bar', //bar, horizontal, pie, line, 
+        data: {
+            labels: ['July', 'August', 'September', 'October', 'November', 'December'],
+            datasets: [{
+                label: 'Sales',
+                data: [28, 48, 40, 19, 86, 90],
+                backgroundColor: 'rgba(60,141,188,0.9)',
+                borderWidth: 1,
+                borderColor: '#777',
+                hoverBorderWidth: 2,
+                hoverBorderColor: '#000'
+            }]
+        },
+        options: barChartOptions
+    })
+</script>

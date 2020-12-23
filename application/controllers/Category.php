@@ -25,6 +25,7 @@ class Category extends CI_Controller
         parent::__construct();
         $this->load->model('Category_model');
         $this->load->model('Brand_model');
+        $this->load->model('Ion_auth_model');
     }
     public function index()
     {
@@ -34,6 +35,8 @@ class Category extends CI_Controller
             // print_r($categories);
             // exit;
             $data = array();
+            $user = $this->Ion_auth_model->user()->row();
+            $data['user'] = $user;
             $data['categories'] = $categories;
             $data['title'] = "View Categories";
             $data['page_name'] = 'categories/categories';
@@ -46,6 +49,8 @@ class Category extends CI_Controller
     {
         if ($this->ion_auth->logged_in()) {
             $brands = $this->Brand_model->list();
+            $user = $this->Ion_auth_model->user()->row();
+            $data['user'] = $user;
             $data['brands'] = $brands;
             $data['title'] = "Add a category";
             $data['page_name'] = 'addcategory/addcategory';
@@ -72,6 +77,8 @@ class Category extends CI_Controller
             $category = $this->Category_model->getCategory($id);
             $brands = $this->Brand_model->list();
             $data = array();
+            $user = $this->Ion_auth_model->user()->row();
+            $data['user'] = $user;
             $data['brands'] = $brands;
             $data['category'] = $category;
             $data['title'] = "Edit a category";
@@ -96,13 +103,20 @@ class Category extends CI_Controller
     }
     public function delete($id)
     {
-        $category = $this->Category_model->getCategory($id);
-        if (empty($category)) {
-            $this->session->set_flashdata('failure', 'Record not found.');
-            redirect('category', 'referesh');
+        if ($this->ion_auth->logged_in()) {
+            $category = $this->Category_model->getCategory($id);
+            if (empty($category)) {
+                $this->session->set_flashdata('failure', 'Record not found.');
+                redirect('category', 'referesh');
+            } else {
+                $formArray = array();
+                $formArray['is_deleted'] = 1;
+                $this->Category_model->updateCategory($formArray, $id);
+                $this->session->set_flashdata('success', 'Record deleted successfully!');
+                redirect('category', 'referesh');
+            }
+        } else {
+            redirect('auth/login', 'refresh');
         }
-        $this->Category_model->deleteCategory($id);
-        $this->session->set_flashdata('success', 'Record deleted successfully!');
-        redirect('category', 'referesh');
     }
 }

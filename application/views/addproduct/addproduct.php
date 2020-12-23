@@ -122,13 +122,13 @@
                 async: true,
                 dataType: 'json',
                 success: function(data) {
+                    console.log(data);
                     var html = '<option>Select Category</option>';
                     var i;
                     for (i = 0; i < data.length; i++) {
                         html += '<option value=' + data[i].id + '>' + data[i].name + '</option>';
                     }
                     $('#category').html(html);
-
                 }
             });
             return false;
