@@ -3,7 +3,6 @@
 <head>
     <title><?= $title; ?></title>
     <?= $this->load->view('/layout/metadata.php', '', true); ?>
-
 </head>
 <html>
 

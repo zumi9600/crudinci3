@@ -27,12 +27,11 @@ class Sale extends CI_Controller
         $this->load->model('Customer_model');
         $this->load->model('Sale_model');
         $this->load->model('Ion_auth_model');
-        $this->load->library('email');
+        // $this->load->library('email');
     }
     public function index()
     {
         if ($this->ion_auth->logged_in()) {
-
             $user = $this->Ion_auth_model->user()->row();
             $user_id = $this->Ion_auth_model->user()->row()->id;
             $products = $this->Product_model->list();
@@ -98,12 +97,36 @@ class Sale extends CI_Controller
             $subject = " Invoice ID # " . $invoice_id;
             $page_name = 'email/email';
             $body = $this->load->view($page_name . '.php', $data, TRUE);
-            $this->email->from($user_email);
-            $this->email->to($to); // replace it with receiver mail id
-            $this->email->subject($subject); // replace it with relevant subject
+
+            // Send configuration
+            $config = array(
+                'protocol'  => 'smtp',
+                'smtp_host' => 'ssl://smtp.googlemail.com',
+                'smtp_port' => 465,
+                'smtp_user' => 'hamza.tiwana92@gmail.com',
+                'smtp_pass' => 'GOOGLE@9800',
+                'mailtype'  => 'html',
+                'charset'   => 'iso-8859-1',
+            );
+            $this->load->library('email', $config);
+            $this->email->set_newline("\r\n");
+            $this->email->to($to);
+            $this->email->from('sender@example.com','eStore');
+            $this->email->subject($subject);
             $this->email->message($body);
+             
+            //Send email
             $this->email->send();
+
+            // -----------------------------
+            
+            // $this->email->from($user_email);
+            // $this->email->to($to); // replace it with receiver mail id
+            // $this->email->subject($subject); // replace it with relevant subject
+            // $this->email->message($body);
+            // $this->email->send();
             echo $this->email->print_debugger();
+            exit;
         } else {
             redirect('auth/login', 'refresh');
         }

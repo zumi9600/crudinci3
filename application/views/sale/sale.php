@@ -486,7 +486,7 @@
                 async: true,
                 success: function(result) {
                     console.log("Ok");
-                    location.reload();
+                    // location.reload();
                     console.log(result);
                 }
             });
